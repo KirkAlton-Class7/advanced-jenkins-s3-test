@@ -20,9 +20,10 @@ pipeline {
                 snykSecurity(
                     snykInstallation: 'snyk',
                     snykTokenId: 'snyk-api-token',
-                    additionalArguments: '--iac --report --org=$SNYK_ORG --severity-threshold=high --no-html-output',
+                    additionalArguments: '--iac --report --org=$SNYK_ORG --severity-threshold=high',
                     failOnIssues: true,
                     monitorProjectOnBuild: false
+                    generateHtmlReport: false
                 )
             }
         }
