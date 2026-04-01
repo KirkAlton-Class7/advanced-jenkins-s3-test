@@ -6,7 +6,7 @@
 # terraform {
 #   backend "s3" {
 #     bucket       = "your-bucket-name-terraform-state"
-#     key          = "jenkins/dev/jenkins-s3-test/terraform.tfstate"
+#     key          = "jenkins/dev/jenkins-advanced-s3-test/terraform.tfstate"
 #     region       = "us-west-2"
 #     encrypt      = true
 #   }
