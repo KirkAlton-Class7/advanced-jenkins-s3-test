@@ -22,7 +22,7 @@ pipeline {
                     snykTokenId: 'snyk-api-token',
                     additionalArguments: '--iac --report --org=$SNYK_ORG --severity-threshold=high',
                     failOnIssues: true,
-                    monitorProjectOnBuild: false
+                    monitorProjectOnBuild: false,
                     generateHtmlReport: false
                 )
             }
