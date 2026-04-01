@@ -23,7 +23,6 @@ pipeline {
                     additionalArguments: '--iac --report --org=$SNYK_ORG --severity-threshold=high',
                     failOnIssues: true,
                     monitorProjectOnBuild: false,
-                    generateHtmlReport: false
                 )
             }
         }

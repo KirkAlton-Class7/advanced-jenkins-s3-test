@@ -19,3 +19,6 @@ EC2 startup script to bootstrap Jenkins server
 ## Tests
 Test 1
 
+## NOTES
+Must use on an EC2. You'll experience errors with M series Mac machines.
+If Jenkins is running on ARM64 architecture (Apple Silicon/Mac) and the snyk-to-html-linux binary is an x86/amd64 binary, it can't run on ARM without multi-arch libraries.
