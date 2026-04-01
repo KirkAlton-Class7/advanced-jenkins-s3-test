@@ -1,44 +1,80 @@
 pipeline {
     agent any
-    
+
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'
+        TF_IN_AUTOMATION   = 'true'
+        SNYK_ORG           = credentials('snyk-org-slug')
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
+
         
         stage('Snyk IaC Scan Monitor') {
             steps {
-                // No credentials needed here if configured globally
                 snykSecurity(
-                    failOnIssues: false,
-                    severity: 'high',
-                    monitorFor: 'iac',
-                    monitorBuildOnSuccess: true,
-                    additionalArguments: '--json --report'
+                    snykInstallation: 'snyk',
+                    snykTokenId: 'snyk-api-token',
+                    additionalArguments: '--iac --report --org=$SNYK_ORG --severity-threshold=high',
+                    failOnIssues: true,
+                    monitorProjectOnBuild: false
                 )
             }
         }
-        
+
         stage('Terraform Init') {
             steps {
-                sh 'terraform init'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-iam-user-creds'
+                ]]) {
+                    sh 'terraform init'
+                }
             }
         }
-        
+
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan'
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-iam-user-creds'
+                ]]) {
+                    sh 'terraform plan'
+                }
             }
         }
-        
+
         stage('Optional Destroy') {
-            when {
-                expression { params.DESTROY == true }
-            }
             steps {
-                sh 'terraform destroy -auto-approve'
+                script {
+                    def destroyChoice = input(
+                        message: 'Do you want to run terraform destroy?',
+                        ok: 'Submit',
+                        parameters: [
+                            choice(
+                                name: 'DESTROY',
+                                choices: ['no', 'yes'],
+                                description: 'Select yes to destroy resources'
+                            )
+                        ]
+                    )
+
+                    if (destroyChoice == 'yes') {
+                        withCredentials([[
+                            $class: 'AmazonWebServicesCredentialsBinding',
+                            credentialsId: 'aws-iam-user-creds'
+                        ]]) {
+                            sh 'terraform destroy -auto-approve'
+                        }
+                    } else {
+                        echo "Skipping destroy"
+                    }
+                }
             }
         }
     }
